@@ -19,7 +19,15 @@ Ensure you have the following installed:
 
 ## Frontend Setup
 
-###  Using ZIP File
+### Option 1: Using Git Clone
+
+#### 1. Clone the Repository
+```sh
+git clone https://github.com/omeradm27/library-app-web.git
+cd library-app-web
+```
+
+### Option 2: Using ZIP File
 
 #### 1. Extract the ZIP File
 - Download and extract the provided ZIP file.
