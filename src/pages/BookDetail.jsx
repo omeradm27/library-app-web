@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import ReplayIcon from "@mui/icons-material/Replay";
 import { fetchBookDetails, fetchUsers, borrowBook, returnBook } from "../api";
 import {
@@ -39,6 +39,8 @@ const BookDetails = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [loading, setLoading] = useState(true);
   const [snackbarInfo, setSnackbarInfo] = useState({ open: false, message: "", severity: "success" });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getBook = async () => {
@@ -91,9 +93,7 @@ const BookDetails = () => {
         else
           setSnackbarInfo({ open: true, message: res.message, severity: "error" });
       });
-
-      const updatedBook = await fetchBookDetails(id);
-      setBook(updatedBook);
+      setLoading(true);
     } catch (error) {
       console.error("Error lending book:", error);
       setSnackbarInfo({ open: true, message: "Error lending book", severity: "error" });
@@ -198,7 +198,7 @@ const BookDetails = () => {
               startIcon={<PersonIcon />}
               sx={{ height: "36px", px: 2, textTransform: "none" }}
               onClick={handleLendBook}
-              disabled={!book.isAvaliable || book.quantity === 0} 
+              disabled={!book.isAvaliable || book.quantity === 0}
             >
               Lend Book
             </Button>
@@ -249,10 +249,10 @@ const BookDetails = () => {
                 <List>
                   {currentBorrowers.map((user) => (
                     <ListItem key={user.id} sx={{ borderBottom: "1px solid #e0e0e0" }}>
-                      <ListItemIcon>
+                      <ListItemIcon onClick={() => navigate(`/users/${user.id}`)} sx={{ cursor: "pointer" }}>
                         <PersonIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText primary={`${user.firstName} ${user.lastName}`} />
+                      <ListItemText primary={`${user.firstName} ${user.lastName}`}  onClick={() => navigate(`/users/${user.id}`)} sx={{ cursor: "pointer" }}/>
                       <Button
                         variant="contained"
                         color="error"

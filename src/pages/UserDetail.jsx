@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import HistoryIcon from "@mui/icons-material/History";
 import { fetchUserDetails, rateBook, returnBook } from "../api";
 import {
@@ -27,7 +27,7 @@ const UserDetail = () => {
     const [loading, setLoading] = useState(true);
     const [ratings, setRatings] = useState({});
     const [snackbarInfo, setSnackbarInfo] = useState({ open: false, message: "", severity: "success" });
-
+    const navigate = useNavigate();
     useEffect(() => {
         const getUser = async () => {
             try {
@@ -40,16 +40,13 @@ const UserDetail = () => {
             }
         };
         getUser();
-    }, [id]);
+    }, [id, loading]);
 
     const handleReturnBook = async (bookId) => {
         try {
             await returnBook(id, bookId);
             setSnackbarInfo({ open: true, message: "Book returned successfully", severity: "success" });
-
-
-            const updatedUser = await fetchUserDetails(id);
-            setUser(updatedUser);
+            setLoading(true);
         } catch (error) {
             console.error("Error returning book:", error);
             setSnackbarInfo({ open: true, message: "Error returning book", severity: "error" });
@@ -71,10 +68,7 @@ const UserDetail = () => {
                     setSnackbarInfo({ open: true, message: res.message, severity: "error" });
 
             });
-
-
-            const updatedUser = await fetchUserDetails(id);
-            setUser(updatedUser);
+            setLoading(true);
         } catch (error) {
             console.error("Error rating book:", error);
             setSnackbarInfo({ open: true, message: "Error rating book", severity: "error" });
@@ -112,33 +106,49 @@ const UserDetail = () => {
                             <List>
                                 {user.borrowedBooks.map((borrow) =>
                                     borrow.returnedAt === null && (
-                                        <ListItem key={borrow.id} sx={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-                                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                                <ListItemIcon>
+                                        <ListItem key={borrow.id} sx={{ display: "flex", justifyContent: "space-between" }}>
+                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                <ListItemIcon onClick={() => navigate(`/books/${borrow.book.id}`)} style={{ cursor: "pointer" }}>
                                                     <BookIcon color="primary" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={borrow.book.title} secondary={`Author: ${borrow.book.author}`} />
+                                                <ListItemText
+                                                    primary={
+                                                        <Typography
+                                                            variant="body1"
+                                                            color="primary"
+                                                            sx={{ cursor: "pointer" }}
+                                                            onClick={() => navigate(`/books/${borrow.book.id}`)}
+                                                        >
+                                                            {borrow.book.title}
+                                                        </Typography>
+                                                    }
+                                                    secondary={
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{ cursor: "pointer" }}
+                                                            onClick={() => navigate(`/books/${borrow.book.id}`)}
+                                                        >
+                                                            Author: {borrow.book.author}
+                                                        </Typography>
+                                                    }
+                                                />
                                             </Box>
 
                                             {/* Rating Component */}
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                                                 <Rating
-                                                    name={`rate-${borrow.bookId}`}
-                                                    value={ratings[borrow.bookId] || borrow.rating || 0}
+                                                    name={`rate-${borrow.book.id}`}
+                                                    value={ratings[borrow.book.id] || 0}
                                                     onChange={(event, newValue) => {
                                                         setRatings((prev) => ({
                                                             ...prev,
-                                                            [borrow.bookId]: newValue,
+                                                            [borrow.book.id]: newValue,
                                                         }));
                                                     }}
                                                     precision={1}
                                                 />
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    size="small"
-                                                    onClick={() => handleRateBook(borrow.bookId)}
-                                                >
+                                                <Button variant="contained" color="primary" size="small" onClick={() => handleRateBook(borrow.book.id)}>
                                                     Submit
                                                 </Button>
                                             </Box>
