@@ -17,6 +17,7 @@ import {
     Rating,
     Alert,
     Snackbar,
+    useMediaQuery
 } from "@mui/material";
 import BookIcon from "@mui/icons-material/Book";
 import ReplayIcon from "@mui/icons-material/Replay";
@@ -28,6 +29,8 @@ const UserDetail = () => {
     const [ratings, setRatings] = useState({});
     const [snackbarInfo, setSnackbarInfo] = useState({ open: false, message: "", severity: "success" });
     const navigate = useNavigate();
+    const isMobile = useMediaQuery("(max-width: 600px)");
+
     useEffect(() => {
         const getUser = async () => {
             try {
@@ -84,29 +87,42 @@ const UserDetail = () => {
     }
 
     return (
-        <Card sx={{ maxWidth: "80%", mx: "auto", mt: 4, p: 3 }}>
+        <Card sx={{ maxWidth: isMobile ? "95%" : "80%", mx: "auto", mt: 4, p: isMobile ? 0 : 3 }}>
             <CardContent>
-                <Box sx={{ display: "flex", gap: 4, alignItems: "flex-start" }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
+                        gap: isMobile ? 2 : 4,
+                        alignItems: isMobile ? "center" : "flex-start",
+                    }}
+                >
+                    {/* User Info */}
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", boxShadow: 2, p: 3, borderRadius: "1rem" }}>
-                        <img src="https://picsum.photos/200" alt="User" style={{ width: "100px", height: "100px", borderRadius: "50%" }} />
-                        <Typography variant="h5" sx={{ fontWeight: "bold", mt: 2 }}>
+                        <img
+                            src="https://picsum.photos/200"
+                            alt="User"
+                            style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+                        />
+                        <Typography variant={isMobile ? "h6" : "h5"} sx={{ fontWeight: "bold", mt: 2 }}>
                             {user.firstName} {user.lastName}
                         </Typography>
-                        <Typography variant="h6" color="textSecondary">
+                        <Typography variant="body2" color="textSecondary">
                             {user.email}
                         </Typography>
                     </Box>
 
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", display: "flex", alignItems: "center", mb: 2 }}>
+                    {/* Currently Borrowed Books */}
+                    <Box sx={{ flexGrow: 1, width: "100%" }}>
+                        <Typography variant={isMobile ? "h6" : "h5"} sx={{ fontWeight: "bold", display: "flex", alignItems: "center", mb: 2 }}>
                             <BookIcon sx={{ mr: 1 }} />
-                            Currently Borrowed Books
+                            Borrowed Books
                         </Typography>
                         {user.borrowedBooks.length > 0 ? (
                             <List>
                                 {user.borrowedBooks.map((borrow) =>
                                     borrow.returnedAt === null && (
-                                        <ListItem key={borrow.id} sx={{ display: "flex", justifyContent: "space-between" }}>
+                                        <ListItem key={borrow.id} sx={{ display: "flex", flexDirection: isMobile ? "column" : "row",justifyContent: isMobile ? "center" : "space-between", gap: 2 , borderBottom: "1px solid #e0e0e0",}}>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                                 <ListItemIcon onClick={() => navigate(`/books/${borrow.book.id}`)} style={{ cursor: "pointer" }}>
                                                     <BookIcon color="primary" />
@@ -122,16 +138,7 @@ const UserDetail = () => {
                                                             {borrow.book.title}
                                                         </Typography>
                                                     }
-                                                    secondary={
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="textSecondary"
-                                                            sx={{ cursor: "pointer" }}
-                                                            onClick={() => navigate(`/books/${borrow.book.id}`)}
-                                                        >
-                                                            Author: {borrow.book.author}
-                                                        </Typography>
-                                                    }
+                                                    secondary={`Author: ${borrow.book.author}`}
                                                 />
                                             </Box>
 
@@ -162,6 +169,7 @@ const UserDetail = () => {
                                             >
                                                 Return
                                             </Button>
+
                                         </ListItem>
                                     )
                                 )}
@@ -176,6 +184,7 @@ const UserDetail = () => {
 
                 <Divider sx={{ my: 3 }} />
 
+                {/* Reading History */}
                 <Box sx={{ mt: 3, width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
                     <Typography variant="h6" sx={{ fontWeight: "bold", display: "flex", alignItems: "center", mb: 1 }}>
                         <HistoryIcon sx={{ mr: 1 }} />
@@ -205,11 +214,8 @@ const UserDetail = () => {
                     )}
                 </Box>
             </CardContent>
-
             <Snackbar open={snackbarInfo.open} autoHideDuration={3000} onClose={() => setSnackbarInfo({ ...snackbarInfo, open: false })}>
-                <Alert severity={snackbarInfo.severity} onClose={() => setSnackbarInfo({ ...snackbarInfo, open: false })}>
-                    {snackbarInfo.message}
-                </Alert>
+                <Alert severity={snackbarInfo.severity}>{snackbarInfo.message}</Alert>
             </Snackbar>
         </Card>
     );

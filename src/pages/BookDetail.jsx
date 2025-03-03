@@ -21,6 +21,7 @@ import {
   InputLabel,
   Snackbar,
   Alert,
+  useMediaQuery
 } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -39,6 +40,7 @@ const BookDetails = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [loading, setLoading] = useState(true);
   const [snackbarInfo, setSnackbarInfo] = useState({ open: false, message: "", severity: "success" });
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const navigate = useNavigate();
 
@@ -66,20 +68,20 @@ const BookDetails = () => {
     getBook();
     getUsers();
   }, [id, loading]);
-    const handleReturnBook = async (userId) => {
-        try {
-            await returnBook(userId, id).then((res) => {
-              if(res.success)
-                setSnackbarInfo({ open: true, message: "Book returned successfully", severity: "success" });
-              else
-                setSnackbarInfo({ open: true, message: res.message, severity: "error" });
-            });
-            setLoading(true);
-        } catch (error) {
-            console.error("Error returning book:", error);
-            setSnackbarInfo({ open: true, message: "Error returning book", severity: "error" });
-        }
-    };
+  const handleReturnBook = async (userId) => {
+    try {
+      await returnBook(userId, id).then((res) => {
+        if (res.success)
+          setSnackbarInfo({ open: true, message: "Book returned successfully", severity: "success" });
+        else
+          setSnackbarInfo({ open: true, message: res.message, severity: "error" });
+      });
+      setLoading(true);
+    } catch (error) {
+      console.error("Error returning book:", error);
+      setSnackbarInfo({ open: true, message: "Error returning book", severity: "error" });
+    }
+  };
   const handleLendBook = async () => {
     if (!selectedUser) {
       setSnackbarInfo({ open: true, message: "Please select a user.", severity: "warning" });
@@ -114,12 +116,12 @@ const BookDetails = () => {
   }
 
   return (
-    <Box sx={{ display: "flex", justifySelf: "center", alignItems: "center", mt: 4, width: "80%" }}>
-      <Card sx={{ shadow: "lg", p: 1, rounded: "lg", bg: "white", maxWidth: "4xl", pt: 4 }}>
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 4, width: isMobile ? "95%" : "80%", mx: "auto" }}>
+      <Card sx={{ width: "100%", p: isMobile ? 2 : 4 }}>
         <CardContent>
-          <Box sx={{ display: "flex" }}>
-            <Box sx={{ px: 1, width: "40%", placeItems: "center" }}>
-              <Typography variant="h5" sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 3 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant={isMobile ? "h6" : "h5"} sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}>
                 <MenuBookIcon sx={{ mr: 1 }} />
                 {book.title}
               </Typography>
@@ -164,7 +166,7 @@ const BookDetails = () => {
               </Box>
             </Box>
 
-            <Box sx={{ px: 5, width: "80%" }}>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="h6" sx={{ fontWeight: "bold", display: "flex", alignItems: "center", mb: 1 }}>
                 <DescriptionIcon sx={{ mr: 1 }} />
                 Summary
@@ -175,7 +177,7 @@ const BookDetails = () => {
             </Box>
           </Box>
 
-          <Box sx={{ mt: 2, display: "flex", alignItems: "center", justifyContent: "end", gap: 1 }}>
+          <Box sx={{ mt: 2, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 2, alignItems: "center" }}>
             <FormControl sx={{ minWidth: 180, height: "36px" }} size="small">
               <InputLabel>Select User</InputLabel>
               <Select
@@ -206,11 +208,17 @@ const BookDetails = () => {
 
 
           <Divider sx={{ my: 2 }} />
-
           {/* Borrow History and Current Borrower */}
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              justifyContent: "space-between",
+              gap: isMobile ? 3 : 0,
+            }}
+          >
             {/* Borrow History */}
-            <Box sx={{ width: "60%" }}>
+            <Box sx={{ width: isMobile ? "100%" : "60%" }}>
               <Typography variant="h6" sx={{ fontWeight: "bold", display: "flex", alignItems: "center", mb: 1 }}>
                 <HistoryIcon sx={{ mr: 1 }} />
                 Borrow History
@@ -219,14 +227,20 @@ const BookDetails = () => {
               {book.borrowRecord.length > 0 ? (
                 <List sx={{ width: "100%" }}>
                   {book.borrowRecord.map((record) => (
-                    <ListItem key={record.id} sx={{ borderBottom: "1px solid #e0e0e0" }}>
+                    <ListItem key={record.id} sx={{ borderBottom: "1px solid #e0e0e0", flexDirection: isMobile ? "column" : "row" }}>
                       <ListItemIcon>
                         <PersonIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText primary={`User: ${record.user.firstName} ${record.user.lastName}`} />
                       <ListItemText
-                        primary={`Borrowed At: ${new Date(record.borrowedAt).toLocaleString()}`}
-                        secondary={`Returned At: ${record.returnedAt ? new Date(record.returnedAt).toLocaleString() : "Not Returned"}`}
+                        primary={`User: ${record.user.firstName} ${record.user.lastName}`}
+                        secondary={
+                          <>
+                            <Typography variant="body2">Borrowed At: {new Date(record.borrowedAt).toLocaleString()}</Typography>
+                            <Typography variant="body2">
+                              Returned At: {record.returnedAt ? new Date(record.returnedAt).toLocaleString() : "Not Returned"}
+                            </Typography>
+                          </>
+                        }
                       />
                     </ListItem>
                   ))}
@@ -239,7 +253,7 @@ const BookDetails = () => {
             </Box>
 
             {/* Lended Persons */}
-            <Box sx={{ width: "35%" }}>
+            <Box sx={{ width: isMobile ? "100%" : "35%" }}>
               <Typography variant="h6" sx={{ fontWeight: "bold", display: "flex", alignItems: "center", mb: 1 }}>
                 <PersonIcon sx={{ mr: 1 }} />
                 Lended Persons
@@ -248,20 +262,26 @@ const BookDetails = () => {
               {currentBorrowers.length > 0 ? (
                 <List>
                   {currentBorrowers.map((user) => (
-                    <ListItem key={user.id} sx={{ borderBottom: "1px solid #e0e0e0" }}>
-                      <ListItemIcon onClick={() => navigate(`/users/${user.id}`)} sx={{ cursor: "pointer" }}>
-                        <PersonIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary={`${user.firstName} ${user.lastName}`}  onClick={() => navigate(`/users/${user.id}`)} sx={{ cursor: "pointer" }}/>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        startIcon={<ReplayIcon />}
-                        onClick={() => handleReturnBook(user.id)}
-                      >
-                        Return
-                      </Button>
+                    <ListItem key={user.id} sx={{ borderBottom: "1px solid #e0e0e0", flexDirection: isMobile ? "column" : "row" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
+                        <ListItemIcon onClick={() => navigate(`/users/${user.id}`)} sx={{ cursor: "pointer" }}>
+                          <PersonIcon color="primary" />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={`${user.firstName} ${user.lastName}`}
+                          onClick={() => navigate(`/users/${user.id}`)}
+                          sx={{ cursor: "pointer" }}
+                        />
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          startIcon={<ReplayIcon />}
+                          onClick={() => handleReturnBook(user.id)}
+                        >
+                          Return
+                        </Button>
+                      </Box>
                     </ListItem>
                   ))}
                 </List>
@@ -271,14 +291,21 @@ const BookDetails = () => {
                 </Typography>
               )}
             </Box>
-
           </Box>
 
+          {/* Back to Books Button */}
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button component={Link} to="/books" variant="contained" startIcon={<ArrowBackIcon />} sx={{ textTransform: "none", borderRadius: "8px" }}>
+            <Button
+              component={Link}
+              to="/books"
+              variant="contained"
+              startIcon={<ArrowBackIcon />}
+              sx={{ textTransform: "none", borderRadius: "8px" }}
+            >
               Back to Books
             </Button>
           </Box>
+
         </CardContent>
       </Card>
 

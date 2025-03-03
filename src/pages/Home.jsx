@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Box, Button } from "@mui/material";
+import { Box, Button, useMediaQuery } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 const Home = () => {
+    const isMobile = useMediaQuery("(max-width:600px)");
     return (
         <Box className="relative w-full h-screen">
             {/* Banner Image */}
@@ -28,7 +29,10 @@ const Home = () => {
                     left: "50%",
                     transform: "translate(-50%, -50%)",
                     display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
                     gap: 2,
+                    alignItems: "center",
+                    width: isMobile ? "80%" : "auto",
                 }}
             >
                 <Button
@@ -39,13 +43,14 @@ const Home = () => {
                     startIcon={<PeopleIcon />}
                     sx={{
                         textTransform: "none",
-                        fontSize: "1rem",
-                        px: 4,
-                        py: 1.5,
+                        fontSize: isMobile ? "0.9rem" : "1rem",
+                        px: isMobile ? 3 : 4,
+                        py: isMobile ? 1 : 1.5,
                         backgroundColor: "#3b82f6",
                         color: "white",
                         borderRadius: "8px",
                         transition: "all 0.3s",
+                        width: isMobile ? "100%" : "auto",
                         "&:hover": { backgroundColor: "#2563eb" },
                     }}
                 >
@@ -59,11 +64,12 @@ const Home = () => {
                     startIcon={<MenuBookIcon />}
                     sx={{
                         textTransform: "none",
-                        fontSize: "1rem",
-                        px: 4,
-                        py: 1.5,
+                        fontSize: isMobile ? "0.9rem" : "1rem",
+                        px: isMobile ? 3 : 4,
+                        py: isMobile ? 1 : 1.5,
                         borderRadius: "8px",
                         transition: "all 0.3s",
+                        width: isMobile ? "100%" : "auto",
                         "&:hover": { backgroundColor: "#15803d" },
                     }}
                 >
